@@ -39,7 +39,11 @@ func (c *sqlServerDriver) Columns(opts *core.TableOptions) ([]*core.Column, erro
 }
 
 func (c *sqlServerDriver) Structure() ([]*core.Structure, error) {
-	query := `SELECT table_schema, table_name FROM INFORMATION_SCHEMA.TABLES`
+	query := `SELECT table_schema, table_name FROM INFORMATION_SCHEMA.TABLES
+		UNION ALL
+		SELECT SPECIFIC_SCHEMA, SPECIFIC_NAME from INFORMATION_SCHEMA.ROUTINES
+		where ROUTINE_TYPE in ('PROCEDURE', 'FUNCTION')
+	`
 
 	rows, err := c.Query(context.TODO(), query)
 	if err != nil {
